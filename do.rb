@@ -8,12 +8,26 @@ class Do
 	def initialize
 	
 		@actions = []
+		
+		@actModEnv = {}
 	
 	end
 	
 	def Output(str)
 	
 		puts str
+	
+	end
+	
+	def SetModEnvVar(k, v)
+	
+		@actModEnv[k] = v
+	
+	end
+	
+	def GetModEnvVar(k)
+	
+		@actModEnv[k]
 	
 	end
 	
@@ -78,8 +92,16 @@ class Do
 		
 		out = "def out(str);@core.Output(str);end"
 		
+		setVar = "def SetVar(k, v);@core.SetModEnvVar(k, v);end"
+		
+		getVar = "def GetVar(k, v);core.GetModEnvVar(k, v);end"
+		
 		inst.send :instance_eval, out
-	
+		
+		inst.send :instance_eval, setVar
+		
+		inst.send :instance_eval, getVar
+		
 	end
 	
 	def LoadActionModule(name)
@@ -172,11 +194,19 @@ class Do
 	
 	end
 	
-	def ExecActionsForDir(actFile, callKey)
+	def ExecActionsForDir(actFile, callSeq, callKey)
+	
+		fullLine = false
+		
+		actLst = []
+		
+		seqLst = []
 	
 		act = nil
 		
-		key = nil
+		key = :default
+		
+		line = ""
 		
 		keys = []
 	
@@ -184,43 +214,127 @@ class Do
 		
 			f.each_line do |l|
 			
-				if l =~ /^\[(\w+)\]$/
+				fullLine = false
+			
+				if l =~ /\\$/
 				
-					act = LoadAction($1)
+					line << l.chop
 				
-				elsif l =~ /^(\w+):$/
+				else
+				
+					line << l
+					
+					fullLine = true
+				
+				end
+				
+				next if !fullLine
+				
+				if line =~ /^\[(\w+)\]$/
+				
+					actLst << act if act
+				
+					act = {:name => $1, :opts => {}}
+				
+				elsif line =~ /^(\w+):$/
 				
 					key = $1
 					
-					keys << key
-					
-				elsif l =~ /(\w+)=(.*)/
+				elsif line =~ /(\w+)=(.*)/
 				
 					if act
 					
-						CallActModuleCb(act, SETOPT_CB_NAME, key, $1, $2)
+						act[:opts][key] = [] if !act[:opts][key]
+						
+						act[:opts][key] << [$1, $2]
+					
+						#CallActModuleCb(act, SETOPT_CB_NAME, key, $1, $2)
 					
 					end
+					
+				elsif line =~ /(\w+) >> \[([A-Za-z, ]+)\]/
+				
+					seq = $2.split(',')
+					
+					seqLst << [$1, seq]
 				
 				end
+				
+				line = ''
 			
 			end
+			
+			actLst << act if act
 		
 		end
 		
 		begin
 		
-			break if !act
+			error = false
+		
+			seq = seqLst.find {|s| callSeq == s[0]}
+		
+			if !seq
+				
+				Output "Sequence %s not found in config file."%callSeq
+				
+				break
+				
+			end
 			
-			break if callKey && !keys.include?(callKey)
+			seq[1].each do |actName|
 			
-			CallActModuleCb(act, 'Do', callKey)
+				act = LoadAction(actName)
+				
+				if !act
+				
+					Output "Failed to load action module %s."%actName
+					
+					error = true
+					
+					break
+				
+				end
+				
+				# Check if there is config for loaded action.
+				
+				actData = actLst.find {|a| a[:name] == actName}
+				
+				if actData
+				
+					if actData[:opts][:default]
+				
+						actData[:opts][:default].each do |o|
+						
+							CallActModuleCb(act, SETOPT_CB_NAME, o[0], o[1])
+						
+						end
+					
+					end
+					
+					if actData[:opts][callKey]
+				
+						actData[:opts][callKey].each do |o|
+						
+							CallActModuleCb(act, SETOPT_CB_NAME, o[0], o[1])
+							
+						end
+					
+					end
+					
+				end
+				
+				CallActModuleCb(act, 'Do')
+			
+			end
+			
+			break if error
 		
 		end while false
 		
 	end
 	
-	def ActionsForDir(name, key)
+	def ActionsForDir(name, seq, key)
 	
 		Dir[name].each do |d|
 		
@@ -228,11 +342,11 @@ class Do
 			
 				if File.directory?(d)
 				
-					ActionsForDir(d + '/*', key)
+					ActionsForDir(d + '/*', seq, key)
 					
 				elsif d =~ /#{CONF_FILE_NAME}$/
 				
-					ExecActionsForDir(d, key)
+					ExecActionsForDir(d, seq, key)
 					
 				end
 		
@@ -242,11 +356,11 @@ class Do
 	
 	end
 	
-	def do(key)
+	def Do(seq, key)
 	
-		EnumActionModules(["./actions"])
+		EnumActionModules([ENV['DO_HOME'] + '/actions', "./actions"])
 		
-		ActionsForDir(Dir.pwd + '/*', key)
+		ActionsForDir(Dir.pwd + '/*', seq, key)
 		
 	end
 
@@ -254,6 +368,8 @@ end
 
 key = nil
 
-key = ARGV[0] if ARGV[0]
+seq = ARGV[0] if ARGV[0]
 
-Do.new.do(key)
+key = ARGV[1] if ARGV[1]
+
+Do.new.Do(seq, key)
