@@ -170,7 +170,7 @@ class Do
 	
 	end
 	
-	def ExecActionsForDir(actFile)
+	def ExecActionsForDir(actFile, callKey)
 	
 		act = nil
 		
@@ -204,13 +204,13 @@ class Do
 		
 		if act
 		
-			CallActModuleCb(act, 'Do')
+			CallActModuleCb(act, 'Do', callKey)
 		
 		end
 	
 	end
 	
-	def ActionsForDir(name)
+	def ActionsForDir(name, key)
 	
 		Dir[name].each do |d|
 		
@@ -218,11 +218,11 @@ class Do
 			
 				if File.directory?(d)
 				
-					ActionsForDir(d + '/*')
+					ActionsForDir(d + '/*', key)
 					
 				elsif d =~ /#{CONF_FILE_NAME}$/
 				
-					ExecActionsForDir(d)
+					ExecActionsForDir(d, key)
 					
 				end
 		
@@ -232,14 +232,18 @@ class Do
 	
 	end
 	
-	def do
+	def do(key)
 	
 		EnumActionModules(["./actions"])
 		
-		ActionsForDir(Dir.pwd + '/*');
+		ActionsForDir(Dir.pwd + '/*', key)
 		
 	end
 
 end
 
-Do.new.do
+key = nil
+
+key = ARGV[0] if ARGV[0]
+
+Do.new.do(key)
