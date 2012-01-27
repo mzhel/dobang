@@ -1,8 +1,17 @@
+require 'pp'
 class Do
+
+	CONF_FILE_NAME = 'doconf'
 
 	def initialize
 	
 		@actions = []
+	
+	end
+	
+	def Output(str)
+	
+		puts str
 	
 	end
 	
@@ -55,74 +64,182 @@ class Do
 		r
 	end
 	
-	def LoadCmdHandlers2(path)
+	def SetModuleVar (inst, var, value)
+	
+		inst.instance_variable_set(var, value)
 		
-		# Create class instance for each handler in directory.
-		
-		Dir["#{path}/*.rb"].each do |f|
-		
-		
-			# [TODO] wrap require into exception handler.
-			
-			require(f)
-			
-			clsInst = ClassObjByName(GetClassNameFromFile(f))
-			
-			runtimeInst = clsInst.send(:new, nil)
-			
-			if runtimeInst != nil
-
-				@actions << runtimeInst
-				
-			end
-			
-		end
 	end
 	
-	def LoadActions(pathArr)
+	def SetModuleEnv(inst)
+	
+		SetModuleVar(inst, :@core, self);
 		
+		out = "def out(str);@core.Output(str);end"
+		
+		inst.send :instance_eval, out
+	
+	end
+	
+	def LoadActionModule(name)
+	
+		r = nil
+	
+		# [TODO] wrap require into exception handler.
+			
+		require(name)
+			
+		clsInst = ClassObjByName(GetClassNameFromFile(name))
+			
+		r = clsInst.send(:new)
+			
+		if r != nil
+
+			SetModuleEnv(r)
+				
+		end
+		
+		r
+	
+	end
+	
+	def EnumActionModulesForDir(path)
+	
+		Dir["#{path}/*.rb"].each do |fname|
+		
+			actCls = GetClassNameFromFile(fname)
+			
+			if actCls
+			
+				@actions << {:fname=> fname, :name => actCls};
+			
+			end
+		
+		end
+	
+	end
+	
+	def EnumActionModules(pathArr)
+	
 		begin
 			
 			break if !pathArr.kind_of? Array
 			
 			pathArr.each do |path|
 			
-				LoadCmdHandlers2(path)
+				EnumActionModulesForDir(path)
 				
 			end
 		
 		end while false
-		
+	
 	end
 	
-	def CallCmdHandler(cmdStr)
+	def LoadAction(name)
 	
-		r = nil
+		r = nil;
+		
+		act = nil
 	
-		cmd, *args = cmdStr.split("|")
+		@actions.each do |a|
 		
-		cmd = 'cmd_' + cmd
-		
-		@cmdHandlers.each do |ch|
-		
-			if ch.respond_to? cmd
+			if a[:name] == name
 			
-				argsCount = ch.method(cmd).arity
+				act = LoadActionModule(a[:fname])
 				
-				r = ch.send(cmd, *args) if argsCount == args.length
+				if act
 				
+					a[:inst] = act
+					
+					r = act
+					
+					break
+				
+				end
+			
 			end
-			
+		
 		end
 		
 		r
+	
+	end
+	
+	def CallActModuleCb(inst, name, *args)
+	
+		inst.send(name,*args)
+	
+	end
+	
+	def ExecActionsForDir(actFile)
+	
+		act = nil
 		
+		key = nil
+	
+		File.open(actFile) do |f|
+		
+			f.each_line do |l|
+			
+				if l =~ /^\[(\w+)\]$/
+				
+					act = LoadAction($1)
+				
+				elsif l =~ /^(\w+):$/
+				
+				key = $1
+					
+				elsif l =~ /(\w+)=(\w+)/
+				
+					if act
+					
+						CallActModuleCb(act, 'SetOption', key, $1, $2)
+					
+					end
+				
+				end
+			
+			end
+		
+		end
+		
+		if act
+		
+			CallActModuleCb(act, 'Do')
+		
+		end
+	
+	end
+	
+	def ActionsForDir(name)
+	
+		Dir[name].each do |d|
+		
+			if d != '.' && d != '..'
+			
+				if File.directory?(d)
+				
+					ActionsForDir(d + '/*')
+					
+				elsif d =~ /#{CONF_FILE_NAME}$/
+				
+					ExecActionsForDir(d)
+					
+				end
+		
+			end
+		
+		end
+	
 	end
 	
 	def do
 	
-		LoadActions(["./actions"])
+		EnumActionModules(["./actions"])
+		
+		ActionsForDir(Dir.pwd + '/*');
 		
 	end
 
 end
+
+Do.new.do
