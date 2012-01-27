@@ -2,6 +2,8 @@ require 'pp'
 class Do
 
 	CONF_FILE_NAME = 'doconf'
+	
+	SETOPT_CB_NAME	= 'Opt'
 
 	def initialize
 	
@@ -166,7 +168,7 @@ class Do
 	
 	def CallActModuleCb(inst, name, *args)
 	
-		inst.send(name,*args)
+		inst.send(name,*args) if inst.respond_to?(name)
 	
 	end
 	
@@ -175,6 +177,8 @@ class Do
 		act = nil
 		
 		key = nil
+		
+		keys = []
 	
 		File.open(actFile) do |f|
 		
@@ -186,13 +190,15 @@ class Do
 				
 				elsif l =~ /^(\w+):$/
 				
-				key = $1
+					key = $1
 					
-				elsif l =~ /(\w+)=(\w+)/
+					keys << key
+					
+				elsif l =~ /(\w+)=(.*)/
 				
 					if act
 					
-						CallActModuleCb(act, 'SetOption', key, $1, $2)
+						CallActModuleCb(act, SETOPT_CB_NAME, key, $1, $2)
 					
 					end
 				
@@ -202,12 +208,16 @@ class Do
 		
 		end
 		
-		if act
+		begin
 		
+			break if !act
+			
+			break if callKey && !keys.include?(callKey)
+			
 			CallActModuleCb(act, 'Do', callKey)
 		
-		end
-	
+		end while false
+		
 	end
 	
 	def ActionsForDir(name, key)
