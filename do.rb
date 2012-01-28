@@ -1,7 +1,7 @@
 require 'pp'
 class Do
 
-	CONF_FILE_NAME = 'doconf'
+	CONF_FILE_NAME = 'dofile'
 	
 	SETOPT_CB_NAME	= 'Opt'
 
