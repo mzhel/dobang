@@ -324,7 +324,17 @@ class Do
 					
 				end
 				
-				CallActModuleCb(act, 'Do')
+				r = CallActModuleCb(act, 'Do')
+				
+				if !r
+				
+					Output "Module %s reported error, exiting."%actName
+					
+					error = true
+					
+					break
+				
+				end
 			
 			end
 			

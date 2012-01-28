@@ -35,6 +35,8 @@ class Deployer
 				end
 			
 			end
+			
+			true
 	
 	end
 
