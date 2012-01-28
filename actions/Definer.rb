@@ -1,0 +1,1 @@
+class Definer	def initialize			@opts = {}		end		def Opt(key, value)			@opts[key] = value		end		def Do			defStr = ""				@opts.each_pair do |k, v|					defStr << %Q{/D "#{k}#{(v)?('='):('')}#{v}" }				end			SetVar(:defines, defStr)		endend

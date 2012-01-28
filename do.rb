@@ -94,7 +94,7 @@ class Do
 		
 		setVar = "def SetVar(k, v);@core.SetModEnvVar(k, v);end"
 		
-		getVar = "def GetVar(k, v);core.GetModEnvVar(k, v);end"
+		getVar = "def GetVar(k);@core.GetModEnvVar(k);end"
 		
 		inst.send :instance_eval, out
 		
@@ -216,9 +216,9 @@ class Do
 			
 				fullLine = false
 			
-				if l =~ /\\$/
+				if l =~ /(.*)\\$/
 				
-					line << l.chop
+					line << $1
 				
 				else
 				
@@ -233,6 +233,8 @@ class Do
 				if line =~ /^\[(\w+)\]$/
 				
 					actLst << act if act
+					
+					key = :default
 				
 					act = {:name => $1, :opts => {}}
 				
@@ -240,15 +242,13 @@ class Do
 				
 					key = $1
 					
-				elsif line =~ /(\w+)=(.*)/
+				elsif line =~ /([\w.\/]+)=(.*)/
 				
 					if act
 					
 						act[:opts][key] = [] if !act[:opts][key]
 						
 						act[:opts][key] << [$1, $2]
-					
-						#CallActModuleCb(act, SETOPT_CB_NAME, key, $1, $2)
 					
 					end
 					
