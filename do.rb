@@ -309,12 +309,12 @@ class Do
 				if actData
 				
 					callKeyLst.each do |callKey|
-				
+					
 						# If options in default key section and in called key section
 						# have same names we need to default key option data to
 						# called key option data.
 						
-						if actData[:opts][callKey] && actData[:opts][:default]
+						if actData[:opts][callKey] && callKey != :default
 						
 							actData[:opts][callKey].each do |o|
 							
@@ -331,7 +331,7 @@ class Do
 							end
 						
 						end
-					
+=begin					
 						if actData[:opts][:default]
 					
 							actData[:opts][:default].each do |o|
@@ -341,7 +341,7 @@ class Do
 							end
 						
 						end
-						
+=end
 						if actData[:opts][callKey]
 					
 							actData[:opts][callKey].each do |o|
@@ -418,7 +418,7 @@ class Do
 
 end
 
-keyLst = []
+keyLst = [:default]
 
 seq = nil
 
@@ -436,6 +436,6 @@ ARGV.each_index do |i|
 
 end
 
-exit if (!seq && keyLst.length == 0)
+exit if (!seq)
 
 exit(Do.new.Do(seq, keyLst))
