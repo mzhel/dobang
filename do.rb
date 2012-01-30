@@ -77,7 +77,9 @@ class Do
 			end
 		
 		end
+		
 		r
+		
 	end
 	
 	def SetModuleVar (inst, var, value)
@@ -194,7 +196,11 @@ class Do
 	
 	end
 	
-	def ExecActionsForDir(actFile, callSeq, callKey)
+	def ExecActionsForDir(actFile, callSeq, callKeyLst)
+	
+		callKey = false
+	
+		execRes = false
 	
 		fullLine = false
 		
@@ -302,24 +308,50 @@ class Do
 				
 				if actData
 				
-					if actData[:opts][:default]
+					callKeyLst.each do |callKey|
 				
-						actData[:opts][:default].each do |o|
+						# If options in default key section and in called key section
+						# have same names we need to default key option data to
+						# called key option data.
 						
-							CallActModuleCb(act, SETOPT_CB_NAME, o[0], o[1])
+						if actData[:opts][callKey] && actData[:opts][:default]
 						
-						end
-					
-					end
-					
-					if actData[:opts][callKey]
-				
-						actData[:opts][callKey].each do |o|
-						
-							CallActModuleCb(act, SETOPT_CB_NAME, o[0], o[1])
+							actData[:opts][callKey].each do |o|
 							
+								doubleOpt = actData[:opts][:default].find {|co| co[0] == o[0]}
+								
+								if doubleOpt
+								
+									o[1] << doubleOpt[1]
+								
+									actData[:opts][:default].delete(doubleOpt)
+								
+								end
+							
+							end
+						
 						end
 					
+						if actData[:opts][:default]
+					
+							actData[:opts][:default].each do |o|
+							
+								CallActModuleCb(act, SETOPT_CB_NAME, o[0], o[1])
+							
+							end
+						
+						end
+						
+						if actData[:opts][callKey]
+					
+							actData[:opts][callKey].each do |o|
+							
+								CallActModuleCb(act, SETOPT_CB_NAME, o[0], o[1])
+								
+							end
+						
+						end
+						
 					end
 					
 				end
@@ -339,12 +371,18 @@ class Do
 			end
 			
 			break if error
+			
+			execRes = true
 		
 		end while false
 		
+		execRes
+		
 	end
 	
-	def ActionsForDir(name, seq, key)
+	def ActionsForDir(name, seq, keyLst)
+	
+		r = false
 	
 		Dir[name].each do |d|
 		
@@ -352,34 +390,52 @@ class Do
 			
 				if File.directory?(d)
 				
-					ActionsForDir(d + '/*', seq, key)
+					ActionsForDir(d + '/*', seq, keyLst)
 					
 				elsif d =~ /#{CONF_FILE_NAME}$/
 				
-					ExecActionsForDir(d, seq, key)
+					r = ExecActionsForDir(d, seq, keyLst)
+					
+					break if !r
 					
 				end
 		
 			end
 		
 		end
+		
+		r
 	
 	end
 	
-	def Do(seq, key)
+	def Do(seq, keyLst)
 	
 		EnumActionModules([ENV['DO_HOME'] + '/actions', "./actions"])
 		
-		ActionsForDir(Dir.pwd + '/*', seq, key)
+		ActionsForDir(Dir.pwd + '/*', seq, keyLst)
 		
 	end
 
 end
 
-key = nil
+keyLst = []
 
-seq = ARGV[0] if ARGV[0]
+seq = nil
 
-key = ARGV[1] if ARGV[1]
+ARGV.each_index do |i|
 
-Do.new.Do(seq, key)
+	if i == 0
+	
+		seq = ARGV[i]
+	
+	else
+	
+		keyLst << ARGV[i]
+	
+	end
+
+end
+
+exit if (!seq && keyLst.length == 0)
+
+exit(Do.new.Do(seq, keyLst))
