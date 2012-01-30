@@ -314,7 +314,7 @@ class Do
 						# have same names we need to default key option data to
 						# called key option data.
 						
-						if actData[:opts][callKey] && callKey != :default
+						if actData[:opts][callKey] && actData[:opts][:default] && callKey != :default
 						
 							actData[:opts][callKey].each do |o|
 							
@@ -331,17 +331,11 @@ class Do
 							end
 						
 						end
-=begin					
-						if actData[:opts][:default]
+
+					end
 					
-							actData[:opts][:default].each do |o|
-							
-								CallActModuleCb(act, SETOPT_CB_NAME, o[0], o[1])
-							
-							end
-						
-						end
-=end
+					callKeyLst.each do |callKey|
+					
 						if actData[:opts][callKey]
 					
 							actData[:opts][callKey].each do |o|
@@ -351,7 +345,7 @@ class Do
 							end
 						
 						end
-						
+					
 					end
 					
 				end
