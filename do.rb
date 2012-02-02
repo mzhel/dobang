@@ -322,7 +322,7 @@ class Do
 								
 								if doubleOpt
 								
-									o[1] << doubleOpt[1]
+									o[1] << ' ' << doubleOpt[1]
 								
 									actData[:opts][:default].delete(doubleOpt)
 								
