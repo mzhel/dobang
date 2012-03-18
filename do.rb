@@ -31,6 +31,7 @@ class Do
 	
 	end
 	
+	
 	def ClassObjByName(className)
 	
 		r = nil
