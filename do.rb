@@ -10,6 +10,8 @@ class Do
 		@actions = []
 		
 		@actModEnv = {}
+		
+		@buildErr = false
 	
 	end
 	
@@ -31,6 +33,11 @@ class Do
 	
 	end
 	
+	def SubstModEnvVar(str)
+	
+		str.sub(/\$ROOTDOFILEDIR/, GetModEnvVar(:rootdofiledir))
+	
+	end
 	
 	def ClassObjByName(className)
 	
@@ -99,11 +106,15 @@ class Do
 		
 		getVar = "def GetVar(k);@core.GetModEnvVar(k);end"
 		
+		subVar = "def SubVar(s);@core.SubstModEnvVar(s);end"
+		
 		inst.send :instance_eval, out
 		
 		inst.send :instance_eval, setVar
 		
 		inst.send :instance_eval, getVar
+		
+		inst.send :instance_eval, subVar
 		
 	end
 	
@@ -197,13 +208,19 @@ class Do
 	
 	end
 	
-	def ExecActionsForDir(actFile, callSeq, callKeyLst)
+	def ExecActionsForDir(actFile, callSeq, callKeyLst, lvl)
+	
+		skip = false
 	
 		callKey = false
 	
 		execRes = false
 	
 		fullLine = false
+		
+		cfgAct = nil
+		
+		cfgDfltKey = nil
 		
 		actLst = []
 		
@@ -275,7 +292,42 @@ class Do
 		
 		end
 		
+		# Check for DoConfig action.
+		
+		cfgAct = actLst.find do |a|
+		
+			a[:name] == 'DoConfig'
+		
+		end
+	
+		cfgDfltKey = cfgAct[:opts][:default] if cfgAct
+		
+		# Skip execution if config section says it's root config file
+		# and this is not first directory level.
+		
+		if cfgDfltKey
+		
+			cfgDfltKey.each do |a|
+			
+				if a[0] == 'ROOTFILE' && lvl != 0
+				
+					skip = true
+				
+				end
+			
+			end
+		
+		end
+		
 		begin
+		
+			if skip
+			
+				execRes = true
+				
+				break
+			
+			end
 		
 			error = false
 		
@@ -357,6 +409,10 @@ class Do
 				
 					Output "Module %s reported error, exiting."%actName
 					
+					# Set global error flag.
+					
+					@buildErr = true
+					
 					error = true
 					
 					break
@@ -375,26 +431,53 @@ class Do
 		
 	end
 	
-	def ActionsForDir(name, seq, keyLst)
+	def ActionsForDir(name, seq, keyLst, lvl, rootDir)
 	
-		r = false
-	
+		r = true
+		
+		cfgFiles = []
+		
 		Dir[name].each do |d|
 		
 			if d != '.' && d != '..'
 			
+				# Check subdirectories for config files first.
+			
 				if File.directory?(d)
 				
-					ActionsForDir(d + '/*', seq, keyLst)
+					Dir.chdir(d) do |path|
 					
+					
+						r = ActionsForDir(d + '/*', seq, keyLst, lvl + 1, rootDir + '/..')
+						
+						break if !r
+					
+					end
+				
 				elsif d =~ /#{CONF_FILE_NAME}$/
 				
-					r = ExecActionsForDir(d, seq, keyLst)
-					
-					break if !r
+					cfgFiles << d
 					
 				end
+				
+			end
 		
+		end
+		
+		# Exec current directory config after all subdirectories was handled.
+		
+		if !@buildErr
+		
+			cfgFiles.each do |cfgFile|
+			
+				Output "\r\n* [%s]\r\n\r\n"%cfgFile
+				
+				SetModEnvVar(:rootdofiledir, rootDir)
+			
+				r = ExecActionsForDir(cfgFile, seq, keyLst, lvl)
+				
+				break if !r
+			
 			end
 		
 		end
@@ -407,7 +490,7 @@ class Do
 	
 		EnumActionModules([ENV['DO_HOME'] + '/actions', "./actions"])
 		
-		ActionsForDir(Dir.pwd + '/*', seq, keyLst)
+		ActionsForDir(Dir.pwd + '/*', seq, keyLst, 0, '.')
 		
 	end
 
