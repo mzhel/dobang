@@ -58,7 +58,7 @@ class GCCLinker
 	
 		r = ""
 	
-		rawStr.split(':').each do |l|
+		rawStr.split(' ').each do |l|
 		
 			r << "-l#{l} "
 		
