@@ -1,4 +1,4 @@
-class GCCLinker
+class CLangLinker
 
 	def initialize
 		
@@ -68,6 +68,20 @@ class GCCLinker
 	
 	end
 	
+	def StaticLibs(rawStr)
+	  
+	  r = ""
+	  
+	  rawStr.split(' ').each do |l|
+	    
+	    r << "#{l} "
+	    
+	  end
+	  
+	  r
+	  
+	end
+	
 	def Objs(objLst)
 	
 		r = ""
@@ -84,7 +98,7 @@ class GCCLinker
 	
 	def LinkerString(opts, objLst)
 	
-		r = "gcc "
+		r = "clang "
 		
 		TouchDir(@opts['TARGETDIR'])
 		
@@ -93,6 +107,8 @@ class GCCLinker
 		r << Keys(opts['KEYS']) if opts['KEYS']
 				
 		r << Objs(objLst)
+		
+		r << StaticLibs(opts['STATIC_LIBS']) if opts['STATIC_LIBS']
 
 		r << Libs(opts['LIBS']) if opts['LIBS']
 
