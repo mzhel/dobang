@@ -225,6 +225,8 @@ class Do
 		actLst = []
 		
 		seqLst = []
+
+		aliasLst = []
 	
 		act = nil
 		
@@ -281,6 +283,12 @@ class Do
 					seq = $2.split(',')
 					
 					seqLst << [$1, seq]
+
+				elsif line =~ /(\w+) == \[([A-Za-z, ]+)\]/
+
+					aliasData = $2.split(' ')
+
+					aliasLst << [$1, aliasData]
 				
 				end
 				
@@ -330,7 +338,19 @@ class Do
 			end
 		
 			error = false
-		
+
+			# First check alias list.
+
+			seq = aliasLst.find {|a| callSeq == a[0]}
+
+			if seq
+
+				callSeq = seq[1][0]
+
+				callKeyLst = callKeyLst + seq[1][1..-1]
+
+			end	
+
 			seq = seqLst.find {|s| callSeq == s[0]}
 		
 			if !seq
