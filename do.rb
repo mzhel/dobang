@@ -234,7 +234,7 @@ class Do
 		
 		line = ""
 		
-		keys = []
+		active_keys = []
 	
 		File.open(actFile) do |f|
 		
@@ -259,22 +259,38 @@ class Do
 				if line =~ /^\[(\w+)\]$/
 				
 					actLst << act if act
-					
-					key = :default
 				
+					active_keys.clear	
+
+					active_keys[0] = :default
+
 					act = {:name => $1, :opts => {}}
 				
 				elsif line =~ /^(\w+):$/
+
+					active_keys.clear
 				
-					key = $1
+					active_keys[0] = :default
+
+				elsif line =~ /^(\w+)\s&\s(\w+):/
+
+					active_keys.clear
+
+					active_keys[0] = $1
+
+					active_keys[1] = $2
 					
 				elsif line =~ /([\w.\/]+)=(.*)/
 				
 					if act
+
+						active_keys.each do |key|
 					
-						act[:opts][key] = [] if !act[:opts][key]
+							act[:opts][key] = [] if !act[:opts][key]
 						
-						act[:opts][key] << [$1, $2]
+							act[:opts][key] << [$1, $2]
+
+						end
 					
 					end
 					
@@ -300,7 +316,7 @@ class Do
 		
 		end
 		
-		# Check for DoConfig action.
+		# Check for DoConfig action section.
 		
 		cfgAct = actLst.find do |a|
 		
