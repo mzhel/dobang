@@ -430,18 +430,35 @@ class Do
 
 					
 					# Get action parameters for each called key 
-					# and store them to array.
+					# and store them into hash.
+					# Hash layout:
+					#
+					# {
+					# 	"param_name" => "param_value",
+					# 	...
+					# }
 					
-					paramsForMod = []
+					paramsForMod = {}
 					
 					callKeyLst.each do |callKey|
 					
 						if actData[:opts][callKey]
 					
 							actData[:opts][callKey].each do |o|
+
+								# If parameter with given name
+								# already exist, we concatenate
+								# new value to already existing.								
+								if !paramsForMod[o[0]]
+
+									paramsForMod[o[0]] = o[1]
+
+								else
+
+									paramsForMod[o[0]] << ' ' << o[1]
+									
+								end
 							
-								paramsForMod << [o[0], o[1]]
-								
 							end
 						
 						end
