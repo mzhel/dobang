@@ -2,21 +2,14 @@ class Cleaner
 
 	def initialize
 
-		@opts = {}
 
 	end
 
-	def Opt(key, value)
+	def Do(opts)
 
-		@opts[key] = value
+		opts['DIRS'].split(';').each do |dir|
 
-	end
-
-	def Do
-
-		@opts['DIRS'].split(';').each do |dir|
-
-			@opts['EXTS'].split(';').each do |mask|
+			opts['EXTS'].split(';').each do |mask|
 
 				Dir[dir + mask].each do |f|
 

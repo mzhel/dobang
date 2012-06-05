@@ -204,7 +204,7 @@ class Do
 	
 	def CallActModuleCb(inst, name, *args)
 	
-		inst.send(name,*args) if inst.respond_to?(name)
+		inst.send(name, *args) if inst.respond_to?(name)
 	
 	end
 	
