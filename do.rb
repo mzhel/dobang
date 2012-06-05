@@ -235,7 +235,11 @@ class Do
 		line = ""
 		
 		active_keys = []
-	
+
+		print "  - Called sequence => %s\n\n"%callSeq
+
+		print "  - Keys => %s\n\n"%(callKeyLst.inject('') {|r, k| r + ' ' + k.to_s})
+
 		File.open(actFile) do |f|
 		
 			f.each_line do |l|
@@ -361,6 +365,13 @@ class Do
 
 			if seq
 
+				print "  - Alias substitution: %s => %s\n\n"%[
+								       	      callSeq,
+				       				       	      (seq[1].inject('') {|r, s| r + ' ' + s})
+								       	      ]
+
+
+
 				callSeq = seq[1][0]
 
 				callKeyLst = callKeyLst + seq[1][1..-1]
@@ -377,6 +388,10 @@ class Do
 				
 			end
 
+			print "  - Executing sequence with keys => %s %s\n\n"%[
+									       callSeq,
+									       (callKeyLst.inject('') {|r, k| r + ' ' + k.to_s})
+									       ]
 
 			# Run all actions of called sequence.
 			
