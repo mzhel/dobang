@@ -2,8 +2,6 @@ class FasmCompiler
 
 	def initialize
 	
-		@opts = {}
-		
 		@pathAliases = {}
 		
 		@srcLst = []
@@ -84,23 +82,23 @@ class FasmCompiler
 		
 		r << preDefs if preDefs
 		
-		opts.each do |opt|
+		opts.each_pair do |key, value|
 		
-			case opt[0]
+			case key
 				
 				when "OBJECTS"
 				
-					Objects(opt[1])
+					Objects(value)
 			
 				when "OBJDIR"
 					
-					TouchDir(opt[1])
+					TouchDir(value)
 					
-					@objDir = opt[1]
+					@objDir = value
 				
 				when "SOURCES"
 				
-					Sources(opt[1])
+					Sources(value)
 			
 			end
 		
@@ -120,17 +118,7 @@ class FasmCompiler
 	# Callbacks from core
 	#
 	
-	def Opt(name, value)
-	
-		key = :default
-	
-		@opts[key] = [] if !@opts[key]
-		
-		@opts[key] << [name, value]
-	
-	end
-	
-	def Do
+	def Do(opts)
 	
 		r = false
 		
@@ -138,7 +126,7 @@ class FasmCompiler
 	
 		begin
 	
-			str = CompilerString(@opts[:default])
+			str = CompilerString(opts)
 		
 			@srcLst.each_index do |i|
 			

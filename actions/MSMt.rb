@@ -1,1 +1,35 @@
-class MSMt	def initialize				@opts = {}			end		def MtString(opts)				r = "mt "				r << %Q{-manifest "#{opts['MANIFEST']}"}				r << %Q{ -outputresource:"#{opts['OUTRESOURCE']}"}				r		end		#	# Callbacks	#		def Opt(name, value)			@opts[name] = value		end		def Do			str = MtString(@opts)			puts str			out %x[#{str}]				($?.exitstatus > 0)?(false):(true)			endend
+class MSMt
+
+	def initialize
+		
+	end
+	
+	def MtString(opts)
+		
+		r = "mt "
+		
+		r << %Q{-manifest "#{opts['MANIFEST']}"}
+		
+		r << %Q{ -outputresource:"#{opts['OUTRESOURCE']}"}
+		
+		r
+	
+	end
+	
+	#
+	# Callbacks
+	#
+	
+	def Do(opts)
+	
+		str = MtString(opts)
+	
+		puts str
+	
+		out %x[#{str}]
+		
+		($?.exitstatus > 0)?(false):(true)
+		
+	end
+
+end

@@ -6,19 +6,11 @@ class Deployer
 
 	def initialize
 	
-		@opts = {}
-	
 	end
 	
-	def Opt(key, value)
+	def Do(opts)
 	
-		@opts[key] = value
-	
-	end
-	
-	def Do
-	
-			@opts.each_pair do |file, dest|
+			opts.each_pair do |file, dest|
 			
 				out "Deploying %s to %s"%[file, dest]
 			

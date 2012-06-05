@@ -2,8 +2,6 @@ class GCCLinker
 
 	def initialize
 		
-		@opts = {}
-		
 		@pathAliases = {}
 		
 		ParsePathAliases(ENV['home'] + '/gccbuildconf')
@@ -86,7 +84,7 @@ class GCCLinker
 	
 		r = "gcc "
 		
-		TouchDir(@opts['TARGETDIR'])
+		TouchDir(opts['TARGETDIR'])
 		
 		r << %Q{-o "#{opts['TARGETDIR']}#{opts['TARGETNAME']}" }
 		
@@ -104,23 +102,9 @@ class GCCLinker
 	# Callbacks
 	#
 	
-	def Opt(name, value)
+	def Do(opts)
 	
-		if !@opts[name]
-		
-			@opts[name] = value
-		
-		else
-		
-			@opts[name] << ' ' << value
-		
-		end
-	
-	end
-	
-	def Do
-	
-		str = LinkerString(@opts, GetVar(:objects))
+		str = LinkerString(opts, GetVar(:objects))
 	
 		puts str
 	

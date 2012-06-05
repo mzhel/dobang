@@ -2,8 +2,6 @@ class GCCCompiler
 
 	def initialize
 	
-		@opts = {}
-		
 		@pathAliases = {}
 		
 		@srcLst = []
@@ -114,33 +112,33 @@ class GCCCompiler
 		
 		r << preDefs if preDefs
 		
-		opts.each do |opt|
+		opts.each_pair do |key, value|
 		
-			case opt[0]
+			case key
 			
 				when "DEFINE"
 				
-					r << Defines(opt[1])
+					r << Defines(value)
 					
 				when "INCLUDE"
 				
-					r << Includes(opt[1])
+					r << Includes(value)
 				
 				when "KEYS"
 				
-					r << Keys(opt[1])
+					r << Keys(value)
 					
 				when "OBJDIR"
 				
-					expDir = SubVar(opt[1])
+					expDir = SubVar(value)
 				
 					TouchDir(expDir)
 					
-					@objDir = opt[1]
+					@objDir = value
 									
 				when "SOURCES"
 				
-					Sources(opt[1])
+					Sources(value)
 			
 			end
 		
@@ -160,17 +158,7 @@ class GCCCompiler
 	# Callbacks from core
 	#
 	
-	def Opt(name, value)
-	
-		key = :default
-	
-		@opts[key] = [] if !@opts[key]
-		
-		@opts[key] << [name, value]
-	
-	end
-	
-	def Do
+	def Do(opts)
 	
 		r = false
 		
@@ -178,7 +166,7 @@ class GCCCompiler
 		
 		begin
 	
-			str = CompilerString(@opts[:default])
+			str = CompilerString(opts)
 			
 			@srcLst.each do |src|
 			  
