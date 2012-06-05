@@ -15,21 +15,25 @@ class FasmCompiler
 	end
 	
 	def ParsePathAliases(path)
+
+		if File.exist? path
 		
-		File.open(path) do |f|
+			File.open(path) do |f|
 		
-			f.each_line do |l|
+				f.each_line do |l|
 			
-				name, value = l.split('=')
+					name, value = l.split('=')
 				
-				@pathAliases[name] = value.chop!
-			
-			end
+					@pathAliases[name] = value.chop!
+				
+				end
 		
+			end
+
 		end
 	
 	end
-	
+
 	def TouchDir(name)
 	
 		begin

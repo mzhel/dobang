@@ -21,19 +21,21 @@ class GCCLinker
 	end
 	
 	def ParsePathAliases(path)
-		
-		File.open(path) do |f|
-		
-			f.each_line do |l|
-			
-				name, value = l.split('=')
-				
-				@pathAliases[name] = value.chop!
-				
 
-			
-			end
+		if File.exist? path
 		
+			File.open(path) do |f|
+		
+				f.each_line do |l|
+			
+					name, value = l.split('=')
+				
+					@pathAliases[name] = value.chop!
+				
+				end
+		
+			end
+
 		end
 	
 	end
