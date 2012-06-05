@@ -270,7 +270,7 @@ class Do
 
 					active_keys.clear
 				
-					active_keys[0] = :default
+					active_keys[0] = $1
 
 				elsif line =~ /^(\w+)\s&\s(\w+):/
 
@@ -376,6 +376,9 @@ class Do
 				break
 				
 			end
+
+
+			# Run all actions of called sequence.
 			
 			seq[1].each do |actName|
 			
@@ -396,11 +399,13 @@ class Do
 				actData = actLst.find {|a| a[:name] == actName}
 				
 				if actData
+
+					# Get action parameters for each called key.
 				
 					callKeyLst.each do |callKey|
 					
 						# If options in default key section and in called key section
-						# have same names we need to default key option data to
+						# have same names we need to add default key option data to
 						# called key option data.
 						
 						if actData[:opts][callKey] && actData[:opts][:default] && callKey != :default
@@ -422,6 +427,12 @@ class Do
 						end
 
 					end
+
+					
+					# Get action parameters for each called key 
+					# and store them to array.
+					
+					paramsForMod = []
 					
 					callKeyLst.each do |callKey|
 					
@@ -429,7 +440,7 @@ class Do
 					
 							actData[:opts][callKey].each do |o|
 							
-								CallActModuleCb(act, SETOPT_CB_NAME, o[0], o[1])
+								paramsForMod << [o[0], o[1]]
 								
 							end
 						
@@ -439,7 +450,7 @@ class Do
 					
 				end
 				
-				r = CallActModuleCb(act, 'Do')
+				r = CallActModuleCb(act, 'Do', paramsForMod)
 				
 				if !r
 				
