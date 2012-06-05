@@ -230,15 +230,13 @@ class Do
 	
 		act = nil
 		
-		key = :default
-		
 		line = ""
 		
 		active_keys = []
 
 		print "  - Called sequence => %s\n\n"%callSeq
 
-		print "  - Keys => %s\n\n"%(callKeyLst.inject('') {|r, k| r + ' ' + k.to_s})
+		print "  - Keys => %s\n\n"%(callKeyLst.inject('') {|r, k| r + k.to_s + ' '}).chop
 
 		File.open(actFile) do |f|
 		
@@ -367,7 +365,7 @@ class Do
 
 				print "  - Alias substitution: %s => %s\n\n"%[
 								       	      callSeq,
-				       				       	      (seq[1].inject('') {|r, s| r + ' ' + s})
+				       				       	      (seq[1].inject('') {|r, s| r + s + ' '}).chop
 								       	      ]
 
 
@@ -388,9 +386,9 @@ class Do
 				
 			end
 
-			print "  - Executing sequence with keys => %s %s\n\n"%[
+			print "  - Executing sequence \"%s\" with keys \"%s\"\n\n"%[
 									       callSeq,
-									       (callKeyLst.inject('') {|r, k| r + ' ' + k.to_s})
+									       (callKeyLst.inject('') {|r, k| r + k.to_s + ' '}).chop
 									       ]
 
 			# Run all actions of called sequence.
@@ -593,6 +591,6 @@ ARGV.each_index do |i|
 
 end
 
-exit if (!seq)
+seq = 'default' if (!seq)
 
 exit(Do.new.Do(seq, keyLst))
