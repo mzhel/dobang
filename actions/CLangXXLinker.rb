@@ -1,4 +1,4 @@
-class CLangLinker
+class CLangXXLinker
 
 	def initialize
 		
@@ -114,7 +114,7 @@ class CLangLinker
 	
 	def LinkerString(opts, objLst)
 	
-		r = "clang "
+		r = "clang++ "
 		
 		TouchDir(opts['TARGETDIR'])
 		

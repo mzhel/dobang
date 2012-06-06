@@ -3,8 +3,6 @@ class Do
 
 	CONF_FILE_NAME = 'dofile'
 	
-	SETOPT_CB_NAME	= 'Opt'
-
 	def initialize
 	
 		@actions = []
@@ -43,7 +41,7 @@ class Do
 
 		@actModEnv.each_pair do |name, value|
 
-			str = str.gsub('$' + name.to_s, value)	if name.kind_of? String
+			str = str.gsub('$' + name.to_s + '$', value)	if name.kind_of? String
 
 		end
 
@@ -259,7 +257,7 @@ class Do
 				if l =~ /(.*)\\$/
 				
 					line << $1
-				
+
 				else
 				
 					line << l
@@ -295,7 +293,7 @@ class Do
 					active_keys[1] = $2
 					
 				elsif line =~ /([\w.\/]+)=(.*)/
-				
+
 					if act
 
 						active_keys.each do |key|
@@ -329,7 +327,7 @@ class Do
 			actLst << act if act
 		
 		end
-		
+
 		# Check for DoConfig action section.
 		
 		cfgAct = actLst.find do |a|
@@ -472,7 +470,7 @@ class Do
 					# }
 					
 					paramsForMod = {}
-					
+
 					callKeyLst.each do |callKey|
 					
 						if actData[:opts][callKey]
