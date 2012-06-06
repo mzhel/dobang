@@ -38,6 +38,18 @@ class Do
 		str.sub(/\$ROOTDOFILEDIR/, GetModEnvVar(:rootdofiledir))
 	
 	end
+
+	def SubstEnvVarsInStr(str)
+
+		@actModEnv.each_pair do |name, value|
+
+			str = str.gsub('$' + name.to_s, value)	if name.kind_of? String
+
+		end
+
+		str
+
+	end
 	
 	def ClassObjByName(className)
 	
@@ -365,7 +377,11 @@ class Do
 
 				print "  - Alias substitution: %s => %s\n\n"%[
 								       	      callSeq,
-				       				       	      (seq[1].inject('') {|r, s| r + s + ' '}).chop
+				       				       	      (
+									       seq[1].inject('') do |r, s| 
+									       	r + s + ' '
+									       end
+									       ).chop
 								       	      ]
 
 
@@ -387,9 +403,13 @@ class Do
 			end
 
 			print "  - Executing sequence \"%s\" with keys \"%s\"\n\n"%[
-									       callSeq,
-									       (callKeyLst.inject('') {|r, k| r + k.to_s + ' '}).chop
-									       ]
+									       	    callSeq,
+									       	    (
+										    callKeyLst.inject('') do |r, k|
+											r + k.to_s + ' '
+										    end
+										     ).chop
+									       	    ]
 
 			# Run all actions of called sequence.
 			
@@ -461,14 +481,20 @@ class Do
 
 								# If parameter with given name
 								# already exist, we concatenate
-								# new value to already existing.								
+								# new value to already existing.
+								
+								# Substitute possible global variables
+								# in value string.
+
+								val = SubstEnvVarsInStr(o[1])
+
 								if !paramsForMod[o[0]]
 
-									paramsForMod[o[0]] = o[1]
+									paramsForMod[o[0]] = val
 
 								else
 
-									paramsForMod[o[0]] << ' ' << o[1]
+									paramsForMod[o[0]] << ' ' << val
 									
 								end
 							
