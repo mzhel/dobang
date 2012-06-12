@@ -1,4 +1,72 @@
 require 'pp'
+
+class Storage
+
+	def initialize
+
+		@storage_name = nil
+		
+		@storage = []
+
+	end
+
+	def Open(name)
+
+		@storage_name = name
+
+		$/ = "---_---"
+
+
+		if File.exists?(name)
+
+			File.open(name, "r").each do |o|
+
+				@storage << Marshal::load(o)
+
+			end
+
+
+		else
+
+			@storage[0] = {}
+
+		end
+
+	end
+
+	def Close(name)
+
+		#$/ = "---_---"
+
+		File.open(name, "w") do |f|
+
+			@storage.each do |s|
+
+				f.print(Marshal::dump(s))
+
+				f.print "---_---"
+
+			end
+
+		end
+
+	end
+
+	def Store(name, value)
+
+
+		@storage[0][name] = value
+
+	end
+
+	def Load(name)
+
+		@storage[0][name]
+
+	end
+
+end
+
 class Do
 
 	CONF_FILE_NAME = 'dofile'
@@ -109,6 +177,8 @@ class Do
 	def SetModuleEnv(inst)
 	
 		SetModuleVar(inst, :@core, self);
+
+		SetModuleVar(inst, :@storage, Storage.new)
 		
 		out = "def out(str);@core.Output(str);end"
 		
@@ -117,6 +187,14 @@ class Do
 		getVar = "def GetVar(k);@core.GetModEnvVar(k);end"
 		
 		subVar = "def SubVar(s);@core.SubstModEnvVar(s);end"
+
+		storageOpen = "def StorageOpen(name);@storage.Open(name);end"
+
+		storageClose = "def StorageClose(name);@storage.Close(name);end"
+
+		storageStore = "def StorageStore(name, value);@storage.Store(name, value);end"
+
+		storageLoad = "def StorageLoad(name);@storage.Load(name);end"
 		
 		inst.send :instance_eval, out
 		
@@ -125,6 +203,14 @@ class Do
 		inst.send :instance_eval, getVar
 		
 		inst.send :instance_eval, subVar
+
+		inst.send :instance_eval, storageOpen
+		
+		inst.send :instance_eval, storageClose
+
+		inst.send :instance_eval, storageStore
+
+		inst.send :instance_eval, storageLoad
 		
 	end
 	
