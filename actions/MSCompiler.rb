@@ -177,21 +177,37 @@ class MSCompiler
 		
 		error = false
 		
+		StorageOpen('mscc.dat')
+		
 		begin
 	
 			str = CompilerString(opts)
 			
 			@srcLst.each do |src|
+			
+				oldMtime = StorageLoad(src)
 				
-				puts str + src
+				newMtime = File.exists?(src)?File.mtime(src):nil
 				
-				out %x[#{str + src}]
-				
-				if $?.exitstatus != 0
-				
-					error = true
+				if newMtime && oldMtime != newMtime
+			
+					puts str + src
 					
-					break
+					out %x[#{str + src}]
+					
+					if $?.exitstatus != 0
+					
+						error = true
+						
+						break
+					
+					end
+					
+					StorageStore(src, newMtime)
+					
+				else
+				
+					out "%s - no modifications detected.\n\n"%src
 				
 				end
 			
@@ -218,6 +234,8 @@ class MSCompiler
 			r = true
 		
 		end while false
+		
+		StorageClose('mscc.dat')
 		
 		r
 		
