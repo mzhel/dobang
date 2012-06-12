@@ -16,10 +16,9 @@ class Storage
 
 		$/ = "---_---"
 
-
 		if File.exists?(name)
 
-			File.open(name, "r").each do |o|
+			File.open(name, "rb").each do |o|
 
 				@storage << Marshal::load(o)
 
@@ -31,14 +30,16 @@ class Storage
 			@storage[0] = {}
 
 		end
+		
+		# Restore to original default vaule.
+		
+		$/ = "\n"
 
 	end
 
 	def Close(name)
 
-		#$/ = "---_---"
-
-		File.open(name, "w") do |f|
+		File.open(name, "wb") do |f|
 
 			@storage.each do |s|
 
