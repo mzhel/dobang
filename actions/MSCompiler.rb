@@ -189,7 +189,7 @@ class MSCompiler
 				
 				newMtime = File.exists?(src)?File.mtime(src):nil
 				
-				if newMtime && oldMtime != newMtime
+				if !oldMtime || (newMtime && oldMtime != newMtime)
 			
 					puts str + src
 					
