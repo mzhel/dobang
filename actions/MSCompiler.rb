@@ -107,7 +107,7 @@ class MSCompiler
 	
 	def CompilerString(opts)
 	
-		r = "cl "
+		r = ""
 		
 		expDir = nil
 		
@@ -167,6 +167,12 @@ class MSCompiler
 	
 	end
 	
+	def GetExt(s)
+	
+		s.scan(/\.\w+$/)[0]
+	
+	end
+	
 	#
 	# Callbacks from core
 	#
@@ -180,6 +186,8 @@ class MSCompiler
 		StorageOpen('mscc.dat')
 		
 		begin
+		
+			cmdWithParams = nil
 	
 			str = CompilerString(opts)
 			
@@ -190,10 +198,26 @@ class MSCompiler
 				newMtime = File.exists?(src)?File.mtime(src):nil
 				
 				if !oldMtime || (newMtime && oldMtime != newMtime)
-			
-					puts str + src
+				
+					# [TRY] Adding /TC or /TP keys depending from file extension.
 					
-					out %x[#{str + src}]
+					if '.cpp' == GetExt(src)
+					
+						cmdWithParams = 'cl /TP ' + str
+					
+					elsif '.c' == GetExt(src)
+					
+						cmdWithParams = 'cl /TC ' + str
+						
+					else
+					
+						cmdWithParams = 'cl ' + str					
+					
+					end
+			
+					puts cmdWithParams + src
+					
+					out %x[#{cmdWithParams + src}]
 					
 					if $?.exitstatus != 0
 					
