@@ -20,6 +20,7 @@ class GCCLinker
 		
 	end
 	
+
 	def ParsePathAliases(path)
 
 		if File.exist? path
@@ -40,6 +41,7 @@ class GCCLinker
 	
 	end
 	
+	
 	def Keys(rawStr)
 	
 		r = ""
@@ -52,6 +54,20 @@ class GCCLinker
 		
 		r
 	
+	end
+
+	def LibDirs(rawStr)
+
+		r = ""
+
+		rawStr.split(';').each do |l|
+
+			r << "-L#{l} "
+
+		end
+
+		r
+
 	end
 	
 	def Libs(rawStr)
@@ -66,6 +82,20 @@ class GCCLinker
 		
 		r
 	
+	end
+	
+	def StaticLibs(rawStr)
+	  
+	  r = ""
+	  
+	  rawStr.split(' ').each do |l|
+	    
+	    r << "#{l} "
+	    
+	  end
+	  
+	  r
+	  
 	end
 	
 	def Objs(objLst)
@@ -93,6 +123,10 @@ class GCCLinker
 		r << Keys(opts['KEYS']) if opts['KEYS']
 				
 		r << Objs(objLst)
+		
+		r << StaticLibs(opts['STATIC_LIBS']) if opts['STATIC_LIBS']
+
+		r << LibDirs(opts['LIBDIRS']) if opts['LIBDIRS']
 
 		r << Libs(opts['LIBS']) if opts['LIBS']
 
