@@ -340,6 +340,8 @@ class Do
 			f.each_line do |l|
 			
 				fullLine = false
+				
+				next if l =~ /^#/
 			
 				if l =~ /(.*)\\$/
 				

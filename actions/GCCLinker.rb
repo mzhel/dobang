@@ -61,6 +61,8 @@ class GCCLinker
 		r = ""
 
 		rawStr.split(';').each do |l|
+		
+			l = @pathAliases[l] if @pathAliases[l]
 
 			r << "-L#{l} "
 
