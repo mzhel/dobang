@@ -166,23 +166,39 @@ class GCCCompiler
 		
 		error = false
 		
+		StorageOpen('gccc.dat')
+		
 		begin
 	
 			str = CompilerString(opts)
 			
 			@srcLst.each do |src|
+			
+				oldMtime = StorageLoad(src)
+				
+				newMtime = File.exists?(src)?File.mtime(src):nil
+				
+				if !oldMtime || (newMtime && oldMtime != newMtime)
 			  
-				execStr = str + src + " -o #{(@objDir?(@objDir):('')) + Ext(src, 'o').scan(/([\w-]*\..{0,3}$)/)[0][0]}"
-				
-				puts execStr
-				
-				out %x[#{execStr}]
-				
-				if $?.exitstatus != 0
-				
-					error = true
+					execStr = str + src + " -o #{(@objDir?(@objDir):('')) + Ext(src, 'o').scan(/([\w-]*\..{0,3}$)/)[0][0]}"
 					
-					break
+					puts execStr
+					
+					out %x[#{execStr}]
+					
+					if $?.exitstatus != 0
+					
+						error = true
+						
+						break
+					
+					end
+					
+					StorageStore(src, newMtime)
+				
+				else
+				
+					out "%s - no modifications detected.\n\n"%src
 				
 				end
 			
@@ -209,6 +225,8 @@ class GCCCompiler
 			r = true
 		
 		end while false
+		
+		StorageClose('gccc.dat')
 		
 		r
 		
