@@ -10,20 +10,24 @@ class Deployer
 	
 	def Do(opts)
 	
-			opts.each_pair do |file, dest|
+			opts.each_pair do |file, destLst|
 			
-				out "Deploying %s to %s"%[file, dest]
+				destLst.split(",").each do |dest|
 			
-				begin
+					out "Deploying %s to %s"%[file, dest]
 				
-					cp(file, dest, :preserve=>true)
+					begin
 					
-					out "OK"
+						cp(file, dest, :preserve=>true)
+						
+						out "OK"
+						
+					rescue
 					
-				rescue
+						out "FAILED"
+						
+					end
 				
-					out "FAILED"
-					
 				end
 			
 			end
