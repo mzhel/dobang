@@ -8,7 +8,7 @@ class CLangCompiler
 		
 		@objDir = nil
 		
-		ParsePathAliases(ENV['home'] + '/gccbuildconf')
+		ParsePathAliases(ENV['HOME'] + '/gccbuildconf')
 	
 	end
 	
@@ -165,26 +165,42 @@ class CLangCompiler
 		r = false
 		
 		error = false
+
+    StorageOpen("clangc.dat")
 		
 		begin
 	
 			str = CompilerString(opts)
 			
 			@srcLst.each do |src|
+
+        oldMtime = StorageLoad(src)
+
+        newMtime = File.exists?(src)?File.mtime(src):nil
+
+        if !oldMtime || (newMtime && oldMtime != newMtime)
 			  
-				execStr = str + src + " -o #{(@objDir?(@objDir):('')) + Ext(src, 'o').scan(/([\w-]*\..{0,3}$)/)[0][0]}"
+				  execStr = str + src + " -o #{(@objDir?(@objDir):('')) + Ext(src, 'o').scan(/([\w-]*\..{0,3}$)/)[0][0]}"
 				
-				puts execStr
+  				puts execStr
 				
-				out %x[#{execStr}]
+	  			out %x[#{execStr}]
 				
-				if $?.exitstatus != 0
+		  		if $?.exitstatus != 0
 				
-					error = true
+			  		error = true
 					
-					break
+				  	break
 				
-				end
+				  end
+
+          StorageStore(src, newMtime)
+
+        else
+
+					#out "%s - no modifications detected.\n\n"%src
+
+        end
 			
 			end
 			
@@ -209,6 +225,8 @@ class CLangCompiler
 			r = true
 		
 		end while false
+
+    StorageClose("clangc.dat")
 		
 		r
 		

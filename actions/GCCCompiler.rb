@@ -8,7 +8,7 @@ class GCCCompiler
 		
 		@objDir = nil
 		
-		ParsePathAliases(ENV['home'] + '/gccbuildconf')
+		ParsePathAliases(ENV['HOME'] + '/gccbuildconf')
 	
 	end
 	

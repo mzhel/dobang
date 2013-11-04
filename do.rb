@@ -621,38 +621,45 @@ class Do
 		
 	end
 	
-	def ActionsForDir(name, seq, keyLst, lvl, rootDir)
+	def ActionsForDir(name, seq, keyLst, lvl, rootDir, recourse)
 	
 		r = true
 		
 		cfgFiles = []
+
+    if recourse
 		
-		Dir[name].each do |d|
+  		Dir[name].each do |d|
 		
-			if d != '.' && d != '..'
+	  		if d != '.' && d != '..'
 			
-				# Check subdirectories for config files first.
+		  		# Check subdirectories for config files first.
 			
-				if File.directory?(d)
+			  	if File.directory?(d)
 				
-					Dir.chdir(d) do |path|
+				  	Dir.chdir(d) do |path|
 					
-					
-						r = ActionsForDir(d + '/*', seq, keyLst, lvl + 1, rootDir + '/..')
+					  	r = ActionsForDir(d + '/*', seq, keyLst, lvl + 1, rootDir + '/..', recourse)
 						
-						break if !r
+						  break if !r
 					
-					end
+					  end
 				
-				elsif d =~ /#{CONF_FILE_NAME}$/
+				  elsif d =~ /#{CONF_FILE_NAME}$/
 				
-					cfgFiles << d
+					  cfgFiles << d
 					
-				end
+				  end
 				
-			end
+			  end
 		
-		end
+		  end
+
+    else
+
+      cfgFiles << CONF_FILE_NAME
+
+    end
 		
 		# Exec current directory config after all subdirectories was handled.
 		
@@ -676,11 +683,11 @@ class Do
 	
 	end
 	
-	def Do(seq, keyLst)
+	def Do(seq, keyLst, recourse)
 	
 		EnumActionModules([ENV['DO_HOME'] + '/actions', "./actions"])
 		
-		ActionsForDir(Dir.pwd + '/*', seq, keyLst, 0, '.')
+		ActionsForDir(Dir.pwd + '/*', seq, keyLst, 0, '.', recourse)
 		
 	end
 
@@ -690,20 +697,34 @@ keyLst = [:default]
 
 seq = nil
 
-ARGV.each_index do |i|
+recourse = false
+
+i = 0
+
+ARGV.each do |arg|
+
+  if arg == '-R'
+
+    recurse = true
+
+    next
+
+  end
 
 	if i == 0
 	
-		seq = ARGV[i]
+		seq = arg
 	
 	else
 	
-		keyLst << ARGV[i]
+		keyLst << arg
 	
 	end
+
+  i = i + 1
 
 end
 
 seq = 'default' if (!seq)
 
-exit(Do.new.Do(seq, keyLst))
+exit(Do.new.Do(seq, keyLst, recourse))
