@@ -318,6 +318,10 @@ class Do
 		cfgAct = nil
 		
 		cfgDfltKey = nil
+
+    aliasAct = nil
+
+    aliasDfltKey = nil
 		
 		actLst = []
 		
@@ -425,6 +429,31 @@ class Do
 		
 		end
 
+    # Check for Alias action section.
+    
+    aliasAct = actLst.find do |a|
+
+      a[:name] == "Alias"
+
+    end
+
+		aliasDfltKey = aliasAct[:opts][:default] if aliasAct
+
+    if aliasDfltKey
+
+      aliasDfltKey.each do |a|
+
+        if a[0] && a[1]
+
+          SetModEnvVar(a[0], a[1])
+
+        end
+
+      end
+
+    end
+
+
 		# Check for DoConfig action section.
 		
 		cfgAct = actLst.find do |a|
@@ -470,7 +499,7 @@ class Do
 
 			if seq
 
-				print "  - Alias substitution: %s => %s\n\n"%[
+				print "  - Alias substitution for sequence: %s => %s\n\n"%[
 								       	      callSeq,
 				       				       	      (
 									       seq[1].inject('') do |r, s| 
