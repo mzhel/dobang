@@ -331,6 +331,14 @@ class Do
 		
 		active_keys = []
 
+    if !File.exists?(actFile)
+
+      puts "%s file is not found in the current directory."%actFile
+
+      return execRes
+
+    end
+
 		print "  - Called sequence => %s\n\n"%callSeq
 
 		print "  - Keys => %s\n\n"%(callKeyLst.inject('') {|r, k| r + k.to_s + ' '}).chop
