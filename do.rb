@@ -55,7 +55,6 @@ class Storage
 
 	def Store(name, value)
 
-
 		@storage[0][name] = value
 
 	end
@@ -99,6 +98,46 @@ class Do
 		@actModEnv[k]
 	
 	end
+
+  def GetFileContents(fname)
+
+    contents = ""
+
+    line = ""
+
+		File.open(fname) do |f|
+		
+			f.each_line do |l|
+			
+				fullLine = false
+				
+				next if l =~ /^#/
+			
+				if l =~ /(.*)\\$/
+				
+					line << $1
+
+				else
+				
+					line << l
+					
+					fullLine = true
+				
+				end
+				
+				next if !fullLine
+
+        contents << line
+
+        line = ""
+
+      end
+
+    end if File.exist?(fname)
+
+    contents
+
+  end
 	
 	def SubstModEnvVar(str)
 	
@@ -107,6 +146,14 @@ class Do
 	end
 
 	def SubstEnvVarsInStr(str)
+
+    md = /@([0-9A-Za-z_\.\\\/-]+)@/.match(str)
+
+    md.captures.each do |c|
+
+      str.gsub!('@' + c.to_s + '@', GetFileContents(c))
+
+    end if md
 
 		@actModEnv.each_pair do |name, value|
 
@@ -452,7 +499,6 @@ class Do
       end
 
     end
-
 
 		# Check for DoConfig action section.
 		
