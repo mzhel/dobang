@@ -86,6 +86,48 @@ class Do
 		puts str
 	
 	end
+
+  def PrintSequences(seqLst, aliasLst)
+
+    # seqLst - list of defined execution sequences
+    #
+    # seqLst => [
+    #             [sequence_name, [module1, module2, ...]],
+    #             ...
+    #           ]
+
+    # aliasLst - list of defined aliases for execution
+    # sequences with keys
+    #
+    # aliasLst => [
+    #              [alias_name, [sequence_name, key1, key2, ...]],
+    #              ...
+    #             ]
+    #
+
+    puts "  Sequences:\n\n"
+
+    seqLst.each do |seq|
+
+      print "\t" + seq[0] + " >> "
+
+      puts "[" + (seq[1].inject('') {|r, k| r + k.to_s + ' '}).chop + "]"
+
+    end
+
+    puts "\n  Aliases:\n\n"
+
+    aliasLst.each do |als|
+
+      print "\t" + als[0] + " == "
+
+      puts "[" + (als[1].inject('') {|r, k| r + k.to_s + ' '}).chop + "]"
+
+    end
+
+    puts
+
+  end
 	
 	def SetModEnvVar(k, v)
 	
@@ -382,6 +424,8 @@ class Do
 		
 		active_keys = []
 
+    print_sequences = false
+
     if !File.exists?(actFile)
 
       puts "%s file is not found in the current directory."%actFile
@@ -390,9 +434,16 @@ class Do
 
     end
 
-		print "  - Called sequence => %s\n\n"%callSeq
+    if callSeq != nil
 
-		print "  - Keys => %s\n\n"%(callKeyLst.inject('') {|r, k| r + k.to_s + ' '}).chop
+		  print "  - Called sequence => %s\n\n"%callSeq
+
+		  print "  - Keys => %s\n\n"%(callKeyLst.inject('') {|r, k| r + k.to_s + ' '}).chop if callKeyLst != nil
+    else
+
+      print_sequences = true
+
+    end
 
 		File.open(actFile) do |f|
 		
@@ -490,7 +541,9 @@ class Do
     #              [alias_name, [sequence_name, key1, key2, ...]],
     #              ...
     #             ]
+    #
 
+    
     # Check for Alias action section.
     
     aliasAct = actLst.find do |a|
@@ -544,6 +597,16 @@ class Do
 		
 		begin
 		
+      if print_sequences
+
+        PrintSequences(seqLst, aliasLst)
+
+        execRes = true
+
+        break
+
+      end
+
 			if skip
 			
 				execRes = true
@@ -797,6 +860,8 @@ seq = nil
 
 recourse = false
 
+print_info = false
+
 i = 0
 
 ARGV.each do |arg|
@@ -806,6 +871,10 @@ ARGV.each do |arg|
     recurse = true
 
     next
+
+  elsif arg == '-i'
+
+    print_info = true
 
   end
 
@@ -823,6 +892,14 @@ ARGV.each do |arg|
 
 end
 
-seq = 'default' if (!seq)
+if print_info
+
+  seq = nil
+
+else
+
+  seq = 'default' if (!seq)
+
+end
 
 exit(Do.new.Do(seq, keyLst, recourse))
