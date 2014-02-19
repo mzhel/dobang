@@ -632,8 +632,6 @@ class Do
 									       ).chop
 								       	      ]
 
-
-
 				callSeq = seq[1][0]
 
 				callKeyLst = callKeyLst + seq[1][1..-1]
@@ -753,6 +751,8 @@ class Do
 					end
 					
 				end
+
+        puts "\n[" + actName + "]\n\n"
 				
 				r = CallActModuleCb(act, 'Do', paramsForMod)
 				
