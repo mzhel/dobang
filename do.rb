@@ -476,6 +476,21 @@ class Do
 		
 		end
 
+    # seqLst - list of defined execution sequences
+    #
+    # seqLst => [
+    #             [sequence_name, [module1, module2, ...]],
+    #             ...
+    #           ]
+
+    # aliasLst - list of defined aliases for execution
+    # sequences with keys
+    #
+    # aliasLst => [
+    #              [alias_name, [sequence_name, key1, key2, ...]],
+    #              ...
+    #             ]
+
     # Check for Alias action section.
     
     aliasAct = actLst.find do |a|
