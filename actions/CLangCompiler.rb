@@ -93,12 +93,12 @@ class CLangCompiler
 	def Includes(rawStr)
 	
 		r = ""
-		
+
 		rawStr.split(";").each do |i|
 		
 			i = @pathAliases[i] if @pathAliases[i]
 		
-			r << %Q{-I "#{i}" }
+			r << %Q{-I "#{i.gsub(/^\s+/, "")}" }
 		
 		end
 		
