@@ -505,13 +505,13 @@ class Do
 					
 					end
 					
-				elsif line =~ /(\w+) >> \[([A-Za-z, ]+)\]/
+				elsif line =~ /(\w+) >> \[([A-Za-z0-9, ]+)\]/
 				
 					seq = $2.split(',')
 					
 					seqLst << [$1, seq]
 
-				elsif line =~ /(\w+) == \[([A-Za-z, ]+)\]/
+				elsif line =~ /(\w+) == \[([A-Za-z0-9, ]+)\]/
 
 					aliasData = $2.split(' ')
 
@@ -542,7 +542,6 @@ class Do
     #              ...
     #             ]
     #
-
     
     # Check for Alias action section.
     
