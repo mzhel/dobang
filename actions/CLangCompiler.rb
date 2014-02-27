@@ -7,6 +7,8 @@ class CLangCompiler
 		@srcLst = []
 		
 		@objDir = nil
+
+    @xxKeys = ""
 		
 		ParsePathAliases(ENV['HOME'] + '/gccbuildconf')
 	
@@ -73,7 +75,21 @@ class CLangCompiler
 		r
 	
 	end
+
+	def KeysXX(rawStr)
 	
+		r = ""
+		
+		rawStr.split(";").each do |k|
+		
+			r << %Q{#{k} }
+		
+		end
+		
+		r
+	
+	end
+
 	def Includes(rawStr)
 	
 		r = ""
@@ -111,6 +127,8 @@ class CLangCompiler
 		expDir = nil
 		
 		preDefs = GetVar(:defines)
+
+    @xxKeys = ""
 		
 		r << preDefs if preDefs
 		
@@ -129,7 +147,11 @@ class CLangCompiler
 				when "KEYS"
 				
 					r << Keys(value)
-					
+				
+        when "KEYSXX"
+				
+					@xxKeys << KeysXX(value)
+
 				when "OBJDIR"
 				
 					expDir = SubVar(value)
@@ -155,6 +177,22 @@ class CLangCompiler
 		s.gsub(/\.\w+$/, '.' + e)
 	
 	end
+
+  def GetExt(s)
+
+    r = ""
+
+    md = /\.(\w+)$/.match(s)
+
+    if md
+
+      r = md[1]
+
+    end
+
+    r
+
+  end
 	
 	#
 	# Callbacks from core
@@ -179,10 +217,10 @@ class CLangCompiler
         newMtime = File.exists?(src)?File.mtime(src):nil
 
         if !oldMtime || (newMtime && oldMtime != newMtime)
-			  
-				  execStr = str + src + " -o #{(@objDir?(@objDir):('')) + Ext(src, 'o').scan(/([\w-]*\..{0,3}$)/)[0][0]}"
-				
-  				puts execStr
+
+				  execStr = str + ((GetExt(src) == "cpp")?@xxKeys:"") + src + " -o #{(@objDir?(@objDir):('')) + Ext(src, 'o').scan(/([\w-]*\..{0,3}$)/)[0][0]}"
+
+          puts execStr
 				
 	  			out %x[#{execStr}]
 				
