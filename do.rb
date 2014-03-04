@@ -87,6 +87,12 @@ class Do
 	
 	end
 
+  def ShellCmd(str)
+
+	  %x[#{str}]
+
+  end
+
   def PrintSequences(seqLst, aliasLst)
 
     # seqLst - list of defined execution sequences
@@ -271,6 +277,8 @@ class Do
 		SetModuleVar(inst, :@storage, Storage.new)
 		
 		out = "def out(str);@core.Output(str);end"
+
+    shellCmd = "def shellCmd(str);@core.ShellCmd(str);end"
 		
 		setVar = "def SetVar(k, v);@core.SetModEnvVar(k, v);end"
 		
