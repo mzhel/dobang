@@ -295,6 +295,10 @@ class Do
 		storageLoad = "def StorageLoad(name);@storage.Load(name);end"
 		
 		inst.send :instance_eval, out
+
+		inst.send :instance_eval, shellCmd
+
+		inst.send :instance_eval, out
 		
 		inst.send :instance_eval, setVar
 		
