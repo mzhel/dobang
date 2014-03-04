@@ -78,6 +78,10 @@ class Do
 		@actModEnv = {}
 		
 		@buildErr = false
+
+    @printShellCmds = false
+
+    @lastShellStatus = nil
 	
 	end
 	
@@ -89,7 +93,33 @@ class Do
 
   def ShellCmd(str)
 
-	  %x[#{str}]
+    r = nil
+
+    if @printShellCmds
+
+      r = "\n"
+
+      Output str
+
+      @lastShellStatus = 0
+
+    else
+
+      Output str
+
+	    r = %x[#{str}]
+
+      @lastShellStatus = $?.exitstatus
+
+    end
+
+    r
+
+  end
+
+  def ShellExitStatus
+
+    @lastShellStatus
 
   end
 
@@ -279,6 +309,8 @@ class Do
 		out = "def out(str);@core.Output(str);end"
 
     shellCmd = "def shellCmd(str);@core.ShellCmd(str);end"
+
+    shellExitStatus = "def shellExitStatus;@core.ShellExitStatus;end"
 		
 		setVar = "def SetVar(k, v);@core.SetModEnvVar(k, v);end"
 		
@@ -297,6 +329,8 @@ class Do
 		inst.send :instance_eval, out
 
 		inst.send :instance_eval, shellCmd
+
+		inst.send :instance_eval, shellExitStatus
 
 		inst.send :instance_eval, out
 		
@@ -855,7 +889,9 @@ class Do
 	
 	end
 	
-	def Do(seq, keyLst, recourse)
+	def Do(seq, keyLst, recourse, no_exec)
+
+    @printShellCmds = no_exec
 	
 		EnumActionModules([ENV['DO_HOME'] + '/actions', "./actions"])
 		
@@ -873,6 +909,8 @@ recourse = false
 
 print_info = false
 
+print_shell_cmds = false
+
 i = 0
 
 ARGV.each do |arg|
@@ -886,6 +924,14 @@ ARGV.each do |arg|
   elsif arg == '-i'
 
     print_info = true
+
+    next
+
+  elsif arg == '-p'
+
+    print_shell_cmds = true
+
+    next
 
   end
 
@@ -913,4 +959,4 @@ else
 
 end
 
-exit(Do.new.Do(seq, keyLst, recourse))
+exit(Do.new.Do(seq, keyLst, recourse, print_shell_cmds))
