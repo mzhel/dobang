@@ -138,9 +138,9 @@ class FasmCompiler
 				
 				obj = @objLst[i]
 				
-				puts str + src + ' ' + @objDir + obj
+				out  str + src + ' ' + @objDir + obj
 				
-				out %x[#{str + src + ' ' + @objDir + obj}]
+				out shellCmd str + src + ' ' + @objDir + obj
 				
 				if $?.exitstatus != 0
 				

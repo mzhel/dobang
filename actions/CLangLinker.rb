@@ -142,9 +142,9 @@ class CLangLinker
 	
 		str = LinkerString(opts, GetVar(:objects))
 	
-		puts str
+		out str
 	
-		out %x[#{str}]
+		out shellCmd str
 		
 		($?.exitstatus > 0)?(false):(true)
 		

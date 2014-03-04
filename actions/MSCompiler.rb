@@ -215,9 +215,9 @@ class MSCompiler
 					
 					end
 			
-					puts cmdWithParams + src
+					out cmdWithParams + src
 					
-					out %x[#{cmdWithParams + src}]
+					out shellCmd cmdWithParams + src
 					
 					if $?.exitstatus != 0
 					

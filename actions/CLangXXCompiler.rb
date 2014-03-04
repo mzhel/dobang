@@ -174,9 +174,9 @@ class CLangXXCompiler
 			  
 				execStr = str + src + " -o #{(@objDir?(@objDir):('')) + Ext(src, 'o').scan(/([\w-]*\..{0,3}$)/)[0][0]}"
 				
-				puts execStr
+				out execStr
 				
-				out %x[#{execStr}]
+				out shellCmd execStr
 				
 				if $?.exitstatus != 0
 				

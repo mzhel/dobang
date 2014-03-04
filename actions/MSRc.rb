@@ -22,9 +22,9 @@ class MSRc
 	
 		str = RcString(opts)
 	
-		puts str
+		out str
 	
-		out %x[#{str}]
+		out shellCmd
 		
 		($?.exitstatus > 0)?(false):(true)
 		
