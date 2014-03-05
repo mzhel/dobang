@@ -142,7 +142,7 @@ class FasmCompiler
 				
 				out shellCmd str + src + ' ' + @objDir + obj
 				
-				if $?.exitstatus != 0
+				if shellExitStatus != 0
 				
 					error = true
 					

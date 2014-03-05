@@ -220,11 +220,9 @@ class CLangCompiler
 
 				  execStr = str + ((GetExt(src) == "cpp")?@xxKeys:"") + src + " -o #{(@objDir?(@objDir):('')) + Ext(src, 'o').scan(/([\w-]*\..{0,3}$)/)[0][0]}"
 
-          out execStr
-				
 	  			out shellCmd execStr
 				
-		  		if $?.exitstatus != 0
+		  		if shellExitStatus != 0
 				
 			  		error = true
 					

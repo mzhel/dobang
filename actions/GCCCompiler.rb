@@ -186,7 +186,7 @@ class GCCCompiler
 					
 					out shellCmd execStr
 					
-					if $?.exitstatus != 0
+					if shellExitStatus != 0
 					
 						error = true
 						

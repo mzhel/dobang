@@ -124,7 +124,7 @@ class MSLib
 	
 		out shellCmd str
 		
-		($?.exitstatus > 0)?(false):(true)
+		(shellExitStatus > 0)?(false):(true)
 		
 	end
 

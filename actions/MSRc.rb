@@ -26,7 +26,7 @@ class MSRc
 	
 		out shellCmd
 		
-		($?.exitstatus > 0)?(false):(true)
+		(shellExitStatus > 0)?(false):(true)
 		
 	end
 end
