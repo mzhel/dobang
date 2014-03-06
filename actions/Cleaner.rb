@@ -2,7 +2,6 @@ class Cleaner
 
 	def initialize
 
-
 	end
 
 	def Do(opts)
@@ -11,13 +10,21 @@ class Cleaner
 
 			opts['EXTS'].split(';').each do |mask|
 
-				Dir[dir + mask].each do |f|
+        if shellCmdsToFile
 
-					out "Deleting %s."%f
+          shellCmd "rm -v " + dir + mask 
 
-					File.delete(f)
+        else
 
-				end
+				  Dir[dir + mask].each do |f|
+
+					  out "Deleting %s."%f
+
+					  File.delete(f)
+
+				  end
+
+        end
 
 			end
 
