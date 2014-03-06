@@ -79,11 +79,25 @@ class Do
 		
 		@buildErr = false
 
-    @printShellCmds = false
+    @cmdsFileName = nil
 
     @lastShellStatus = nil
 	
 	end
+
+  def GetPlatform
+
+    r = "Unknown"
+
+    if RUBY_PLATFORM =~ /linux/
+
+      r = "linux"
+
+    end
+
+    r
+
+  end
 	
 	def Output(str)
 	
@@ -95,11 +109,17 @@ class Do
 
     r = nil
 
-    if @printShellCmds
+    if @cmdsFileName
 
       r = "\n"
 
       Output str
+
+      File.open(@cmdsFileName, 'a') do |f|
+
+        f << str << "\n\n"
+
+      end
 
       @lastShellStatus = 0
 
@@ -120,6 +140,12 @@ class Do
   def ShellExitStatus
 
     @lastShellStatus
+
+  end
+
+  def ShellCmdsToFile
+
+    @cmdsFileName != nil
 
   end
 
@@ -308,6 +334,8 @@ class Do
 		
 		out = "def out(str);@core.Output(str);end"
 
+    shellCmdsToFile = "def shellCmdsToFile;@core.ShellCmdsToFile;end"
+
     shellCmd = "def shellCmd(str);@core.ShellCmd(str);end"
 
     shellExitStatus = "def shellExitStatus;@core.ShellExitStatus;end"
@@ -331,6 +359,8 @@ class Do
 		inst.send :instance_eval, shellCmd
 
 		inst.send :instance_eval, shellExitStatus
+
+		inst.send :instance_eval, shellCmdsToFile
 
 		inst.send :instance_eval, out
 		
@@ -797,7 +827,20 @@ class Do
 					
 				end
 
-        puts "\n[" + actName + "]\n\n"
+
+        if @cmdsFileName
+
+          File.open(@cmdsFileName, "a") do |f|
+
+            f << "\n\# [" + actName + "]\n\n"
+
+          end
+
+        else
+
+          Output "\n[" + actName + "]\n\n"
+
+        end
 				
 				r = CallActModuleCb(act, 'Do', paramsForMod)
 				
@@ -889,9 +932,19 @@ class Do
 	
 	end
 	
-	def Do(seq, keyLst, recourse, no_exec)
+	def Do(seq, keyLst, recourse, cmdsFile)
 
-    @printShellCmds = no_exec
+    @cmdsFileName = cmdsFile
+
+    if cmdsFile && GetPlatform() == 'linux'
+
+      File.open(cmdsFile, "w") do |f|
+
+        f << "\#!" + `which sh` << "\n"
+
+      end
+
+    end
 	
 		EnumActionModules([ENV['DO_HOME'] + '/actions', "./actions"])
 		
@@ -909,7 +962,7 @@ recourse = false
 
 print_info = false
 
-print_shell_cmds = false
+cmds_file = nil
 
 i = 0
 
@@ -927,9 +980,9 @@ ARGV.each do |arg|
 
     next
 
-  elsif arg == '-p'
+  elsif arg =~ /--to-file=([a-zA-Z0-9.-]+)/
 
-    print_shell_cmds = true
+    cmds_file = $1
 
     next
 
@@ -959,4 +1012,4 @@ else
 
 end
 
-exit(Do.new.Do(seq, keyLst, recourse, print_shell_cmds))
+exit(Do.new.Do(seq, keyLst, recourse, cmds_file))
