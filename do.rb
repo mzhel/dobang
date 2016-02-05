@@ -974,13 +974,13 @@ ARGV.each do |arg|
 
     next
 
-  elsif arg == '-i'
+  elsif arg == '-i' or arg == '--print-actions-info'
 
     print_info = true
 
     next
 
-  elsif arg =~ /--to-file=([a-zA-Z0-9.-]+)/
+  elsif arg =~ /-f=([a-zA-Z0-9.-]+)/ or arg =~ /--create-script-file=([a-zA-Z0-9.-]+)/
 
     cmds_file = $1
 
