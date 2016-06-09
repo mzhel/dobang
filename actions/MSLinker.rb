@@ -128,9 +128,7 @@ class MSLinker
 	
 		str = LinkerString(opts, GetVar(:objects))
 	
-		out str
-	
-		out shellCmd str
+		shellCmd str
 		
 		(shellExitStatus > 0)?(false):(true)
 		

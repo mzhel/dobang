@@ -215,9 +215,7 @@ class MSCompiler
 					
 					end
 			
-					out cmdWithParams + src
-					
-					out shellCmd cmdWithParams + src
+					shellCmd cmdWithParams + src
 					
 					if shellExitStatus != 0
 					
