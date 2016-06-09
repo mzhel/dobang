@@ -128,6 +128,8 @@ class Do
       Output str
 
 	    r = %x[#{str}]
+		
+		Output r
 
       @lastShellStatus = $?.exitstatus
 
