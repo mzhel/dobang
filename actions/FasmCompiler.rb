@@ -138,9 +138,9 @@ class FasmCompiler
 				
 				obj = @objLst[i]
 				
-				out  str + src + ' ' + @objDir + obj
+				#out  str + src + ' ' + @objDir + obj
 				
-				out shellCmd str + src + ' ' + @objDir + obj
+				shellCmd str + src + ' ' + @objDir + obj
 				
 				if shellExitStatus != 0
 				
