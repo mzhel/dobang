@@ -8,6 +8,8 @@ class MSCompiler
 		
 		@objDir = nil
 		
+		@asmDir = nil
+		
 		ParsePathAliases(ENV['home'] + '/vcbuildconf')
 	
 	end
@@ -148,6 +150,16 @@ class MSCompiler
 					TouchDir(expDir)
 				
 					r << "/Fd#{expDir} "
+				
+				when "ASMDIR"
+				
+					expDir = SubVar(value)
+					
+					@asmDir = expDir
+					
+					TouchDir(expDir)
+					
+					r << "/Fa#{expDir} "
 					
 				when "SOURCES"
 				
@@ -188,6 +200,8 @@ class MSCompiler
 		begin
 		
 			cmdWithParams = nil
+			
+			asmFiles = []
 	
 			str = CompilerString(opts)
 			
@@ -214,6 +228,14 @@ class MSCompiler
 						cmdWithParams = 'cl ' + str					
 					
 					end
+					
+					if @asmDir
+					
+						asm = "#{@asmDir + Ext(src, 'asm').scan(/([\w-]*\..{0,3}$)/)[0][0]}"
+						
+						asmFiles << asm
+						
+					end
 			
 					shellCmd cmdWithParams + src
 					
@@ -235,7 +257,17 @@ class MSCompiler
 			
 			end
 			
-			break if error			
+			break if error
+			
+			if asmFiles.length > 0
+
+				preAsmFiles = GetVar(:asmFiles)
+			
+				asmFiles = preAsmFiles + asmFiles if preAsmFiles
+			
+				SetVar(:asmFiles, asmFiles)
+			
+			end
 		
 			# Save built objects names to environment
 			
