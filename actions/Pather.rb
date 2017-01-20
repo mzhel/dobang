@@ -39,8 +39,16 @@ class Pather
 			value = @pathAliases[value] if @pathAliases[value]
 		
 			out "Adding %s to PATH environment variable"%value
+			
+			if shellCmdsToFile
+			
+				shellCmd "set \"path=%path%;#{value}\""
+			
+			else
 		
-			ENV['PATH'] += ';' + value
+				ENV['PATH'] += ';' + value
+			
+			end
 		
 		end
 	end
