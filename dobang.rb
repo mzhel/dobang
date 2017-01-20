@@ -7,7 +7,7 @@ class Storage
 		@storage_name = nil
 		
 		@storage = []
-
+		
 	end
 
 	def Open(name)
@@ -83,6 +83,8 @@ class Do
 
     @lastShellStatus = nil
 	
+	@commentOp = GetCommentOpForPlatform()
+	
 	end
 
   def GetPlatform
@@ -97,6 +99,18 @@ class Do
 
     r
 
+  end
+  
+  def GetCommentOpForPlatform
+	
+	if GetPlatform() == "linux"
+		'#'
+	else
+	
+		'rem'
+	
+	end
+	
   end
 	
 	def Output(str)
@@ -834,7 +848,7 @@ class Do
 
           File.open(@cmdsFileName, "a") do |f|
 
-            f << "\n\# [" + actName + "]\n\n"
+            f << "\n#{@commentOp} [" + actName + "]\n\n"
 
           end
 
