@@ -567,7 +567,7 @@ class Do
 
 					active_keys[0] = :default
 
-					act = {:name => $1, :opts => {}}
+					act = {:name => $1, :opts => {}, :mult_opt_keys => []}
 				
 				elsif line =~ /^(\w+):$/
 
@@ -575,7 +575,7 @@ class Do
 				
 					active_keys[0] = $1
 
-				elsif line =~ /^(\w+)\s&\s(\w+):/
+				elsif line =~ /^(\w+)\s&&\s(\w+):/
 
 					active_keys.clear
 
@@ -586,15 +586,31 @@ class Do
 				elsif line =~ /([\w.\/]+)=(.*)/
 
 					if act
-
-						active_keys.each do |key|
 					
-							act[:opts][key] = [] if !act[:opts][key]
+						if active_keys.length > 0
 						
-							act[:opts][key] << [$1, $2]
-
+							if active_keys.length == 1
+							
+								key = active_keys[0]
+								
+								act[:opts][key] = [] if !act[:opts][key]
+						
+								act[:opts][key] << [$1, $2]
+							
+							else 
+								
+								key = active_keys.join(" ")
+							
+								act[:opts][key] = [] if !act[:opts][key]
+								
+								act[:opts][key] << [$1, $2]
+								
+								act[:mult_opt_keys] << key
+								
+							end
+						
 						end
-					
+			
 					end
 					
 				elsif line =~ /(\w+) >> \[([A-Za-z0-9, ]+)\]/
@@ -688,15 +704,15 @@ class Do
 		
 		begin
 		
-      if print_sequences
+			if print_sequences
 
-        PrintSequences(seqLst, aliasLst)
+				PrintSequences(seqLst, aliasLst)
 
-        execRes = true
+				execRes = true
 
-        break
+				break
 
-      end
+			end
 
 			if skip
 			
@@ -747,7 +763,7 @@ class Do
 										    end
 										     ).chop
 									       	    ]
-
+			
 			# Run all actions of called sequence.
 			
 			seq[1].each do |actName|
@@ -769,6 +785,28 @@ class Do
 				actData = actLst.find {|a| a[:name] == actName}
 				
 				if actData
+				
+					actData[:mult_opt_keys].each do |mult_opt_key|
+					
+						puts "mult_opt_key |%s|"%mult_opt_key
+					
+						key_arr = mult_opt_key.split(" ")
+						
+						keys_to_find = key_arr.length
+						
+						keys_found = 0
+						
+						key_arr.each do |key|
+						
+							keys_found += 1 if callKeyLst.include?(key)
+						
+						end
+						
+						puts "to_find %d found %d"%[keys_to_find, keys_found]
+						
+						callKeyLst << mult_opt_key if keys_found == keys_to_find
+					
+					end
 
 					# Get action parameters for each called key.
 				
@@ -797,7 +835,6 @@ class Do
 						end
 
 					end
-
 					
 					# Get action parameters for each called key 
 					# and store them into hash.
