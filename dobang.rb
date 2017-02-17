@@ -788,8 +788,6 @@ class Do
 				
 					actData[:mult_opt_keys].each do |mult_opt_key|
 					
-						puts "mult_opt_key |%s|"%mult_opt_key
-					
 						key_arr = mult_opt_key.split(" ")
 						
 						keys_to_find = key_arr.length
@@ -801,8 +799,6 @@ class Do
 							keys_found += 1 if callKeyLst.include?(key)
 						
 						end
-						
-						puts "to_find %d found %d"%[keys_to_find, keys_found]
 						
 						callKeyLst << mult_opt_key if keys_found == keys_to_find
 					
