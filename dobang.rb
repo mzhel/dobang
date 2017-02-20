@@ -350,11 +350,11 @@ class Do
 		
 		out = "def out(str);@core.Output(str);end"
 
-    shellCmdsToFile = "def shellCmdsToFile;@core.ShellCmdsToFile;end"
+		shellCmdsToFile = "def shellCmdsToFile;@core.ShellCmdsToFile;end"
 
-    shellCmd = "def shellCmd(str);@core.ShellCmd(str);end"
+		shellCmd = "def shellCmd(str);@core.ShellCmd(str);end"
 
-    shellExitStatus = "def shellExitStatus;@core.ShellExitStatus;end"
+		shellExitStatus = "def shellExitStatus;@core.ShellExitStatus;end"
 		
 		setVar = "def SetVar(k, v);@core.SetModEnvVar(k, v);end"
 		
@@ -500,9 +500,9 @@ class Do
 		
 		cfgDfltKey = nil
 
-    aliasAct = nil
+		aliasAct = nil
 
-    aliasDfltKey = nil
+		aliasDfltKey = nil
 		
 		actLst = []
 		
@@ -516,7 +516,7 @@ class Do
 		
 		active_keys = []
 
-    print_sequences = false
+		print_sequences = false
 
     if !File.exists?(actFile)
 
@@ -782,130 +782,140 @@ class Do
 				
 				# Check if there is config for loaded action.
 				
-				actData = actLst.find {|a| a[:name] == actName}
+				actInsts = actLst.select do |a|
 				
-				if actData
+					a[:name] == actName
 				
-					actData[:mult_opt_keys].each do |mult_opt_key|
-					
-						key_arr = mult_opt_key.split(" ")
-						
-						keys_to_find = key_arr.length
-						
-						keys_found = 0
-						
-						key_arr.each do |key|
-						
-							keys_found += 1 if callKeyLst.include?(key)
-						
-						end
-						
-						callKeyLst << mult_opt_key if keys_found == keys_to_find
-					
-					end
-
-					# Get action parameters for each called key.
+				end
 				
-					callKeyLst.each do |callKey|
-					
-						# If options in default key section and in called key section
-						# have same names we need to add default key option data to
-						# called key option data.
-						
-						if actData[:opts][callKey] && actData[:opts][:default] && callKey != :default
-						
-							actData[:opts][callKey].each do |o|
-							
-								doubleOpt = actData[:opts][:default].find {|co| co[0] == o[0]}
-								
-								if doubleOpt
-								
-									o[1] << ' ' << doubleOpt[1]
-								
-									actData[:opts][:default].delete(doubleOpt)
-								
-								end
-							
-							end
-						
-						end
-
-					end
-					
-					# Get action parameters for each called key 
-					# and store them into hash.
-					# Hash layout:
-					#
-					# {
-					# 	"param_name" => "param_value",
-					# 	...
-					# }
-					
+				actInsts.each do |actData|
+				
 					paramsForMod = {}
-
-					callKeyLst.each do |callKey|
+				
+					if actData
 					
-						if actData[:opts][callKey]
-					
-							actData[:opts][callKey].each do |o|
+						actData[:mult_opt_keys].each do |mult_opt_key|
+						
+							key_arr = mult_opt_key.split(" ")
+							
+							keys_to_find = key_arr.length
+							
+							keys_found = 0
+							
+							key_arr.each do |key|
+							
+								keys_found += 1 if callKeyLst.include?(key)
+							
+							end
+							
+							callKeyLst << mult_opt_key if keys_found == keys_to_find
+						
+						end
 
-								# If parameter with given name
-								# already exist, we concatenate
-								# new value to already existing.
+						# Get action parameters for each called key.
+					
+						callKeyLst.each do |callKey|
+						
+							# If options in default key section and in called key section
+							# have same names we need to add default key option data to
+							# called key option data.
+							
+							if actData[:opts][callKey] && actData[:opts][:default] && callKey != :default
+							
+								actData[:opts][callKey].each do |o|
 								
-								# Substitute possible global variables
-								# in value string.
-
-								val = SubstEnvVarsInStr(o[1])
-
-								if !paramsForMod[o[0]]
-
-									paramsForMod[o[0]] = val
-
-								else
-
-									paramsForMod[o[0]] << ' ' << val
+									doubleOpt = actData[:opts][:default].find {|co| co[0] == o[0]}
 									
+									if doubleOpt
+									
+										o[1] << ' ' << doubleOpt[1]
+									
+										actData[:opts][:default].delete(doubleOpt)
+									
+									end
+								
+								end
+							
+							end
+
+						end
+						
+						# Get action parameters for each called key 
+						# and store them into hash.
+						# Hash layout:
+						#
+						# {
+						# 	"param_name" => "param_value",
+						# 	...
+						# }
+						
+						callKeyLst.each do |callKey|
+						
+							if actData[:opts][callKey]
+						
+								actData[:opts][callKey].each do |o|
+
+									# If parameter with given name
+									# already exist, we concatenate
+									# new value to already existing.
+									
+									# Substitute possible global variables
+									# in value string.
+
+									val = SubstEnvVarsInStr(o[1])
+
+									if !paramsForMod[o[0]]
+
+										paramsForMod[o[0]] = val
+
+									else
+
+										paramsForMod[o[0]] << ' ' << val
+										
+									end
+								
 								end
 							
 							end
 						
 						end
-					
+						
+					end
+
+
+					if @cmdsFileName
+
+					  File.open(@cmdsFileName, "a") do |f|
+
+						f << "\n#{@commentOp} [" + actName + "]\n\n"
+
+					  end
+
+					else
+
+					  Output "\n[" + actName + "]\n\n"
+
 					end
 					
-				end
-
-
-        if @cmdsFileName
-
-          File.open(@cmdsFileName, "a") do |f|
-
-            f << "\n#{@commentOp} [" + actName + "]\n\n"
-
-          end
-
-        else
-
-          Output "\n[" + actName + "]\n\n"
-
-        end
-				
-				r = CallActModuleCb(act, 'Do', paramsForMod)
-				
-				if !r
-				
-					Output "Module %s reported error, exiting."%actName
+					r = CallActModuleCb(act, 'Do', paramsForMod)
 					
-					# Set global error flag.
+					if !r
 					
-					@buildErr = true
+						Output "Module %s reported error, exiting."%actName
+						
+						# Set global error flag.
+						
+						@buildErr = true
+						
+						error = true
+						
+						break
 					
-					error = true
-					
-					break
+					end
 				
 				end
+				
+				break if error
 			
 			end
 			
