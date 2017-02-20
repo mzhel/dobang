@@ -8,6 +8,8 @@ class MSRc
 		
 		@res_path = nil
 		
+		@rc_path = nil
+		
 	end
 	
 	def ParsePathAliases(path)
@@ -62,7 +64,6 @@ class MSRc
 	def RcString(opts)
 		
 		r = "rc "
-		rc_path = nil
 		includes = nil
 		
 		opts.each_pair do |key, value|
@@ -75,7 +76,7 @@ class MSRc
 					
 				when "INFILE"
 				
-					rc_path = value
+					@rc_path = value
 					
 				when "INCLUDE"
 				
@@ -85,7 +86,7 @@ class MSRc
 		
 		end
 		
-		r << %Q{/fo"#{@res_path}" #{includes} "#{rc_path}"}
+		r << %Q{/fo"#{@res_path}" #{includes} "#{@rc_path}"}
 		
 		r
 	
@@ -98,27 +99,46 @@ class MSRc
 	def Do(opts)
 	
 		r = false
+		
+		StorageOpen('msrc.dat')
 	
 		begin
 	
-		str = RcString(opts)
-	
-		shellCmd str
+			str = RcString(opts)
+			
+			oldMtime = StorageLoad(@rc_path)
+				
+			newMtime = File.exists?(@rc_path)?File.mtime(@rc_path):nil
+			
+			if !oldMtime || (newMtime && oldMtime != newMtime)
 		
-		break if shellExitStatus > 0
-		
-		objs = [@res_path]
+				shellCmd str
+				
+				break if shellExitStatus > 0
+				
+				StorageStore(@rc_path, newMtime)
+				
+			else
+			
+				out "%s - no modifications detected.\n\n"%@rc_path
+			
+			end
+			
+			objs = [@res_path]
 
-		preObjs = GetVar(:objects)
+			preObjs = GetVar(:objects)
+				
+			objs = preObjs + objs if preObjs
+				
+			SetVar(:objects, objs)
 			
-		objs = preObjs + objs if preObjs
-			
-		SetVar(:objects, objs)
-		
-		r = true
+			r = true
 	
 		end while false
 		
+		StorageClose('msrc.dat')
+		
 		r
+		
 	end
 end
