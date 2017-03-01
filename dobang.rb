@@ -15,6 +15,8 @@ class Storage
 		@storage_name = name
 
 		$/ = "---_---"
+		
+		@storage = []
 
 		if File.exists?(name)
 
@@ -634,7 +636,7 @@ class Do
 			actLst << act if act
 		
 		end
-
+		
     # seqLst - list of defined execution sequences
     #
     # seqLst => [
@@ -791,6 +793,14 @@ class Do
 				actInsts.each do |actData|
 				
 					paramsForMod = {}
+					
+					instCallKeyLst = []
+					
+					callKeyLst.each do |k|
+					
+						instCallKeyLst << k
+					
+					end
 				
 					if actData
 					
@@ -804,17 +814,17 @@ class Do
 							
 							key_arr.each do |key|
 							
-								keys_found += 1 if callKeyLst.include?(key)
+								keys_found += 1 if instCallKeyLst.include?(key)
 							
 							end
 							
-							callKeyLst << mult_opt_key if keys_found == keys_to_find
+							instCallKeyLst << mult_opt_key if keys_found == keys_to_find
 						
 						end
-
+						
 						# Get action parameters for each called key.
 					
-						callKeyLst.each do |callKey|
+						instCallKeyLst.each do |callKey|
 						
 							# If options in default key section and in called key section
 							# have same names we need to add default key option data to
@@ -849,7 +859,7 @@ class Do
 						# 	...
 						# }
 						
-						callKeyLst.each do |callKey|
+						instCallKeyLst.each do |callKey|
 						
 							if actData[:opts][callKey]
 						
