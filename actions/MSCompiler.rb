@@ -83,6 +83,8 @@ class MSCompiler
 		
 		rawStr.split(";").each do |i|
 		
+			i.strip!
+		
 			i = @pathAliases[i] if @pathAliases[i]
 		
 			r << %Q{/I "#{i}" }

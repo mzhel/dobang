@@ -60,6 +60,8 @@ class MSLinker
 		
 		rawStr.split(";").each do |d|
 		
+			d.strip!
+		
 			d = @pathAliases[d] if @pathAliases[d]
 		
 			r << %Q{/LIBPATH:"#{d}" }
@@ -74,7 +76,7 @@ class MSLinker
 	
 		r = ""
 	
-		rawStr.split(':').each do |l|
+		rawStr.split(' ').each do |l|
 		
 			r << "#{l} "
 		
