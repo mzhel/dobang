@@ -74,7 +74,7 @@ class MSLib
 	
 		r = ""
 	
-		rawStr.split(':').each do |l|
+		rawStr.split(' ').each do |l|
 		
 			r << "#{l} "
 		
@@ -98,9 +98,35 @@ class MSLib
 	
 	end
 	
+	def Keys(rawStr)
+	
+		r = ""
+		
+		rawStr.split(";").each do |k|
+		
+			r << %Q{#{k} }
+		
+		end
+		
+		r
+	
+	end
+	
 	def LinkerString(opts, objLst)
 	
 		r = "lib "
+		
+		opts.each_pair do |k, v|
+		
+			case k
+			
+				when "KEYS"
+				
+					r << Keys(v)
+			
+			end
+		
+		end
 		
 		TouchDir(opts['TARGETDIR'])
 		
